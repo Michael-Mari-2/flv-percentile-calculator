@@ -201,6 +201,30 @@
     white-space: nowrap;
   }
   .pctl-figure sup { font-size: 20px; }
+  .z-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 0 18px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .z-stat-label {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .z-stat-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 22px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
   .result-meta { display: flex; flex-direction: column; gap: 6px; min-width: 220px; flex: 1; }
   .pill {
     display: inline-flex;
@@ -447,6 +471,10 @@
     <div class="result-col">
       <div class="panel result-tile">
         <div class="pctl-figure" id="pctlFigure">70<sup>th</sup></div>
+        <div class="z-stat">
+          <span class="z-stat-label">Z-score</span>
+          <span class="z-stat-value" id="zScoreFigure">0.00</span>
+        </div>
         <div class="result-meta">
           <span class="pill good" id="statusPill">Within normal range</span>
           <span class="result-text" id="resultText"></span>
@@ -491,6 +519,7 @@ const els = {
   unitBadge: document.getElementById('unitBadge'),
   fitInfo: document.getElementById('fitInfo'),
   pctlFigure: document.getElementById('pctlFigure'),
+  zScoreFigure: document.getElementById('zScoreFigure'),
   statusPill: document.getElementById('statusPill'),
   resultText: document.getElementById('resultText'),
   chartTitle: document.getElementById('chartTitle'),
@@ -583,7 +612,7 @@ function computeAll(varKey, ga, value) {
   const pctl = pnorm(z) * 100;
   const bands = {};
   ['P3','P5','P10','P50','P90','P95','P97'].forEach(k => { bands[k] = interp(d.ga, d[k], gaC); });
-  return { pctl, gaC, bands, p50AtGA };
+  return { pctl, z, gaC, bands, p50AtGA };
 }
 
 function ordinalSuffix(n) {
@@ -620,15 +649,16 @@ function render() {
   els.chartTitle.textContent = d.label;
   els.tier3Warning.hidden = d.tier !== 3;
 
-  const { pctl, gaC, bands } = computeAll(varKey, ga, value);
+  const { pctl, z, gaC, bands } = computeAll(varKey, ga, value);
   const rounded = Math.max(0.1, Math.min(99.9, pctl));
   els.pctlFigure.innerHTML = (rounded < 1 ? '<1' : rounded > 99 ? '>99' : Math.round(rounded)) + '<sup>' + ordinalSuffix(rounded) + '</sup>';
+  els.zScoreFigure.textContent = (z >= 0 ? '+' : '') + z.toFixed(2);
   const st = statusFor(pctl);
   els.statusPill.className = 'pill ' + st.cls;
   els.statusPill.textContent = st.label;
   els.resultText.textContent = d.label.split(',')[0] + ' of ' + fmtNum(value, d.units) + (d.units ? ' ' + shortUnit(d.units) : '') +
     ' at ' + gaC.toFixed(1) + ' weeks falls at the ' + (rounded < 1 ? 'below the 1st' : rounded > 99 ? 'above the 99th' : Math.round(rounded) + ordinalSuffix(rounded)) +
-    ' percentile of the AGA reference.';
+    ' percentile of the AGA reference (z = ' + (z >= 0 ? '+' : '') + z.toFixed(2) + ').';
 
   // fit info
   const cohortLine = 'AGA';
