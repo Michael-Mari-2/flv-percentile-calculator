@@ -801,14 +801,28 @@ render();
   try { alreadyUnlocked = sessionStorage.getItem('flv_unlocked') === '1'; } catch (e) {}
   if (alreadyUnlocked) { unlock(); }
 
-  form.addEventListener('submit', function(evt) {
-    evt.preventDefault();
-    if (input.value === GATE_PASSWORD) {
+  function attemptUnlock() {
+    if (input.value.trim() === GATE_PASSWORD) {
       unlock();
     } else {
       errorEl.textContent = 'Incorrect password. Try again.';
       input.value = '';
       input.focus();
+    }
+  }
+
+  form.addEventListener('submit', function(evt) {
+    evt.preventDefault();
+    attemptUnlock();
+  });
+
+  // Belt-and-suspenders: some browsers/password managers intercept Enter in a
+  // password field for their own autofill suggestions instead of letting it
+  // reach the form's native submit behavior. Handle it explicitly here too.
+  input.addEventListener('keydown', function(evt) {
+    if (evt.key === 'Enter') {
+      evt.preventDefault();
+      attemptUnlock();
     }
   });
 })();
