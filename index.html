@@ -421,7 +421,7 @@
       </div>
 
       <div class="tier3-warning" id="tier3Warning" hidden>
-        <strong>Exploratory - read before using.</strong> This curve is built from a much smaller sample than the other measurements (33-38 subjects vs. 172), and several gestational weeks have too few observations to include. The final weeks of the range have no direct data at all and are extrapolated by the model - treat those estimates with caution.
+        <strong>Exploratory - read before using.</strong> This curve is built from a much smaller sample than the other measurements, and several gestational weeks have too few observations to include. The final weeks of the range have no direct data at all and are extrapolated by the model - treat those estimates with caution.
       </div>
 
       <div>
@@ -471,7 +471,7 @@
     <div>
       <h3>Method</h3>
       <p>Box-Cox transform &rarr; linear mixed-effects model, GA as linear or quadratic by BIC, random intercept per fetus &rarr; percentiles as predicted mean + z&middot;residual SD, back-transformed.</p>
-      <p>Reference curves built on the AGA (appropriately-grown) cohort only, BCM site, n=172 fetuses, GA 16-40 weeks.</p>
+      <p>Reference curves built on the AGA (appropriately-grown) cohort only, BCM site, GA 16-40 weeks.</p>
     </div>
     <div>
       <h3>Read before using</h3>
@@ -631,9 +631,7 @@ function render() {
     ' percentile of the AGA reference.';
 
   // fit info
-  const cohortLine = d.tier === 3
-    ? 'AGA, n=' + d.n_subj_raw + ' subj'
-    : 'AGA, n=172';
+  const cohortLine = 'AGA';
   const weeksLine = d.tier === 3
     ? d.n_weeks_retained + ' of 25 GA weeks'
     : '16-40 wk';
